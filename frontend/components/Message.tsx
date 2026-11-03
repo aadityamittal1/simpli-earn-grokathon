@@ -1,13 +1,16 @@
 import SuggestionChips from "./SuggestionChips";
+import GrokAnswer from "./pulse/GrokAnswer";
+import type { GrokPayload } from "@/lib/pulse-chat";
 
 interface MessageProps {
     sender: string;
     text: string;
     suggestions?: string[];
     onSuggestionClick?: (suggestion: string) => void;
+    grok?: GrokPayload;
 }
 
-export default function Message({ sender, text, suggestions, onSuggestionClick }: MessageProps) {
+export default function Message({ sender, text, suggestions, onSuggestionClick, grok }: MessageProps) {
     if (sender === 'user') {
         return (
             <div className="w-full flex justify-end mt-5">
@@ -17,7 +20,7 @@ export default function Message({ sender, text, suggestions, onSuggestionClick }
     }
     return (
         <div className="mt-5">
-            <p className="whitespace-pre-line text-sm text-foreground">{text}</p>
+            {grok ? <GrokAnswer grok={grok} /> : <p className="whitespace-pre-line text-sm text-foreground">{text}</p>}
             {suggestions && suggestions.length > 0 && onSuggestionClick && (
                 <SuggestionChips
                     suggestions={suggestions}

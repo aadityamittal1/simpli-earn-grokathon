@@ -1,5 +1,6 @@
 // Chat messages and the history the browser sends to the RAG API's /chat. The API keeps no chat
 // state: each request carries the earlier answered turns about the same transcript.
+import type { GrokPayload } from "./pulse-chat";
 
 export type ChatMessage = {
   id: number;
@@ -8,6 +9,7 @@ export type ChatMessage = {
   suggestions?: string[]; // Optional array of follow-up question suggestions
   source?: string; // Transcript the exchange was about (dashboard id or video URL)
   replyTo?: number; // For bot messages: id of the question this answers
+  grok?: GrokPayload; // Grok-enhanced answer sections (only sent as `text` in history)
 };
 
 // Must match the RAG API's request limits (RAG/api_chatbot.py), which reject anything larger

@@ -38,13 +38,21 @@ export default function ChatBot({
 
   const source = `${dashboardId ?? ""}|${videoUrl ?? ""}`;
 
+  // Grokathon: the Apple dashboard (the one with Grok-bot data) can answer from X, YouTube and
+  // news as well as the transcript. "Classic" keeps the original RAG-only behaviour.
+  const grokAvailable = dashboardId === "1";
+  const [mode, setMode] = useState<"classic" | "grok">("grok");
+  const useGrok = grokAvailable && mode === "grok";
+  const [pending, setPending] = useState(0);
+
   const ask = async (text: string) => {
     // `messages` is the list before this question is added; unanswered questions are left out
     const history = historyFor(messages, source);
     const questionId = nextMessageId();
     setMessages((prev) => [...prev, { id: questionId, sender: "user", text, source }]);
+    setPending((n) => n + 1);
     try {
-      const res = await fetch(`${API_BASE_URL}/chat`, {
+      const res = await fetch(useGrok ? "/api/pulse/chat" : `${API_BASE_URL}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,6 +71,7 @@ export default function ChatBot({
         sender: "bot", // Explicitly set to "bot"
         text: data.response || "⚠️ No response from server.",
         suggestions: data.suggestions || [], // Include suggestions from API
+        grok: data.grok, // sectioned, source-cited answer (Grok mode only)
         source,
         replyTo: questionId,
       };
@@ -76,6 +85,8 @@ export default function ChatBot({
       };
       setMessages((prev) => [...prev, errorMessage]);
       console.error("Error sending message:", error);
+    } finally {
+      setPending((n) => n - 1);
     }
   };
 
@@ -132,9 +143,33 @@ export default function ChatBot({
             sender={message.sender}
             suggestions={message.suggestions}
             onSuggestionClick={handleSuggestionClick}
+            grok={message.grok}
           />
         ))}
+        {pending > 0 && (
+          <p className="mt-5 animate-pulse text-xs text-muted-foreground">
+            {useGrok ? "✨ Grok is reading the transcript, X, YouTube and news…" : "Thinking…"}
+          </p>
+        )}
       </div>
+
+      {grokAvailable && (
+        <div className="flex shrink-0 items-center gap-2 text-[11px] text-muted-foreground">
+          <div className="inline-flex rounded-full border border-white/10 bg-black/35 p-0.5">
+            {(["classic", "grok"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                className={`cursor-pointer rounded-full px-3 py-1 font-medium transition ${mode === m ? "bg-primary text-primary-foreground" : "hover:text-foreground"}`}
+              >
+                {m === "classic" ? "Classic SimpliChat" : "✨ Grok SimpliChat"}
+              </button>
+            ))}
+          </div>
+          <span>{mode === "grok" ? "Transcript + X + YouTube + News, cited" : "Transcript only (original)"}</span>
+        </div>
+      )}
 
       {/* Equal padding on every side and items-end: the send button sits bottom-right in
           every state, which is vertically centred while the input is one line tall */}
