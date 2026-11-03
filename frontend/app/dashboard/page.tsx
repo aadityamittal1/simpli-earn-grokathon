@@ -6,6 +6,7 @@ import DashboardTab from "@/components/DashboardTab";
 import VideoFrame from "@/components/VideoFrame";
 import SummaryFrame from "@/components/SummaryFrame";
 import ChartsFrame from "@/components/ChartsFrame";
+import RelatedNews from "@/components/RelatedNews";
 import ChatFrame from "@/components/ChatFrame";
 import type { PipelineState } from "@/components/ChartsFrame";
 import type { Message } from "@/components/ChatBot";
@@ -283,6 +284,9 @@ function DashboardContent() {
               </div>
             </div>
           )}
+          <div className="lg:col-span-2">
+            <RelatedNews />
+          </div>
         </main>
       </div>
     </div>
