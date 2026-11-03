@@ -240,8 +240,13 @@ function DashboardContent() {
   return (
     <div className="relative min-h-[calc(100vh-57px)] w-full bg-background">
       <div className="w-full h-full">
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-3">
           <DashboardTab />
+          {searchParams.get("id") === "1" && (
+            <div className="pt-4">
+              <a href="/pulse?ticker=AAPL&date=2025-01-30" className="btn-outline no-underline">Grok Pulse →</a>
+            </div>
+          )}
         </div>
         {/* Two rows shared by both columns: video | summary (top), charts | chat (bottom).
             Only the left column sizes the rows; the right-hand panels fill their grid area
