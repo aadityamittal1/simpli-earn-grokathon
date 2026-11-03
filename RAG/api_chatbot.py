@@ -48,6 +48,12 @@ try:
 except ImportError as e:
     print(f"Warning: Could not import dashboard creation endpoint: {e}")
 
+try:
+    from related_news import router as news_router
+    app.include_router(news_router, tags=["news"])
+except ImportError as e:
+    print(f"Warning: Could not import related news endpoint: {e}")
+
 # Largest request body accepted by any endpoint. A full /chat request (20 turns at the field limits)
 # is well under 512 KB; nothing else sends more than a few KB.
 MAX_REQUEST_BODY_BYTES = int(os.getenv("MAX_REQUEST_BODY_BYTES", str(1024 * 1024)))
